@@ -1,7 +1,6 @@
 package spanner
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -24,37 +23,15 @@ func (p *Parser) Parse(r io.Reader) ([]ast.Statement, error) {
 		return nil, err
 	}
 
-	var ddls []spannerast.DDL
 	// TODO input file name?
-	ddls, err = memefish.ParseDDLs("sqlc-ddls.sql", string(blob))
-	var tryDMLs bool
-	{
-		var spErr *memefish.Error
-		// TODO correct error handling
-		if errors.As(err, &spErr); spErr != nil {
-			tryDMLs = true
-			ddls = nil
-		} else if err != nil {
-			return nil, err
-		}
-	}
-
-	var dmls []spannerast.DML
-	if tryDMLs {
-		var spErr *memefish.Error
-		// TODO input file name?
-		dmls, err = memefish.ParseDMLs("sqlc-internal.sql", string(blob))
-		// TODO correct error handling
-		if errors.As(err, &spErr); spErr != nil {
-			dmls = nil
-		} else if err != nil {
-			return nil, err
-		}
+	spStmts, err := memefish.ParseStatements("sqlc-internal.sql", string(blob))
+	if err != nil {
+		return nil, err
 	}
 
 	var stmts []ast.Statement
-	for _, ddl := range ddls {
-		n, err := translateDDL(ddl)
+	for _, spStmt := range spStmts {
+		n, err := translate(spStmt)
 		if err != nil {
 			return nil, err
 		}
@@ -64,25 +41,8 @@ func (p *Parser) Parse(r io.Reader) ([]ast.Statement, error) {
 		stmts = append(stmts, ast.Statement{
 			Raw: &ast.RawStmt{
 				Stmt:         n,
-				StmtLocation: int(ddl.Pos()),
-				StmtLen:      len(ddl.SQL()),
-			},
-		})
-	}
-
-	for _, dml := range dmls {
-		n, err := translateDML(dml)
-		if err != nil {
-			return nil, err
-		}
-		if n == nil {
-			return nil, fmt.Errorf("unexpected nil node")
-		}
-		stmts = append(stmts, ast.Statement{
-			Raw: &ast.RawStmt{
-				Stmt:         n,
-				StmtLocation: int(dml.Pos()),
-				StmtLen:      len(dml.SQL()),
+				StmtLocation: int(spStmt.Pos()),
+				StmtLen:      len(spStmt.SQL()),
 			},
 		})
 	}
@@ -90,18 +50,17 @@ func (p *Parser) Parse(r io.Reader) ([]ast.Statement, error) {
 	return stmts, nil
 }
 
-func translateDDL(stmt spannerast.DDL) (ast.Node, error) {
+func translate(stmt spannerast.Statement) (ast.Node, error) {
 	switch expr := stmt.(type) {
 	case *spannerast.CreateTable:
 		return convertCreateTable(expr)
+	case *spannerast.CreateIndex:
+		return convertCreateIndex(expr), nil
+	case *spannerast.QueryStatement:
+		return convertQueryStatement(expr)
 	default:
-		return &ast.TODO{}, nil
+		return nil, fmt.Errorf("unexpected statement type: %T. %q", expr, expr.SQL())
 	}
-}
-
-func translateDML(stmt spannerast.DML) (ast.Node, error) {
-	// TODO
-	return &ast.TODO{}, nil
 }
 
 func (p *Parser) CommentSyntax() source.CommentSyntax {

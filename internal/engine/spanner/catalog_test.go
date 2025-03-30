@@ -11,7 +11,7 @@ import (
 	"github.com/sqlc-dev/sqlc/internal/sql/catalog"
 )
 
-func TestUpdate(t *testing.T) {
+func TestDDLs(t *testing.T) {
 	p := NewParser()
 
 	for i, tc := range []struct {
@@ -67,10 +67,93 @@ func TestUpdate(t *testing.T) {
 				}
 			}
 
-			if diff := cmp.Diff(e, c, cmpopts.EquateEmpty(), cmpopts.IgnoreUnexported(catalog.Column{}), cmpopts.IgnoreFields(ast.ColumnDef{}, "Location"), cmpopts.IgnoreFields(ast.TypeName{}, "Location")); diff != "" {
+			if diff := cmp.Diff(e, c, cmpDiffOpts()...); diff != "" {
 				t.Log(test.stmt)
 				t.Errorf("catalog mismatch:\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestDMLs(t *testing.T) {
+	p := NewParser()
+
+	for i, tc := range []struct {
+		stmt   string
+		parsed []ast.Statement
+	}{
+		{
+			`
+			SELECT 1
+			`,
+			[]ast.Statement{
+				{
+					Raw: &ast.RawStmt{
+						Stmt: &ast.SelectStmt{},
+					},
+				},
+			},
+		},
+		{
+			`
+			SELECT * FROM Singers WHERE SingerId = 1
+			`,
+			[]ast.Statement{
+				{
+					Raw: &ast.RawStmt{
+						Stmt: &ast.SelectStmt{
+							FromClause: &ast.List{
+								Items: []ast.Node{
+									&ast.TableName{Name: "Singers"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			`
+			SELECT * FROM Singers WHERE SingerId = @singerId
+			`,
+			[]ast.Statement{
+				{
+					Raw: &ast.RawStmt{
+						Stmt: &ast.SelectStmt{
+							FromClause: &ast.List{
+								Items: []ast.Node{
+									&ast.TableName{Name: "Singers"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	} {
+		test := tc
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			stmts, err := p.Parse(strings.NewReader(test.stmt))
+			if err != nil {
+				t.Log(test.stmt)
+				t.Fatal(err)
+			}
+
+			if diff := cmp.Diff(test.parsed, stmts, cmpDiffOpts()...); diff != "" {
+				t.Log(test.stmt)
+				t.Errorf("catalog mismatch:\n%s", diff)
+			}
+		})
+	}
+}
+
+func cmpDiffOpts() cmp.Options {
+	return cmp.Options{
+		cmpopts.EquateEmpty(),
+		cmpopts.IgnoreUnexported(catalog.Column{}),
+		cmpopts.IgnoreFields(ast.ColumnDef{}, "Location"),
+		cmpopts.IgnoreFields(ast.TypeName{}, "Location"),
+		cmpopts.IgnoreFields(ast.RawStmt{}, "StmtLocation"),
+		cmpopts.IgnoreFields(ast.RawStmt{}, "StmtLen"),
 	}
 }
