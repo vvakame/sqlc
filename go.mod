@@ -6,6 +6,7 @@ toolchain go1.24.1
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1
+	github.com/cloudspannerecosystem/memefish v0.4.0
 	github.com/cubicdaiya/gonp v1.0.4
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/structtag v1.2.0
