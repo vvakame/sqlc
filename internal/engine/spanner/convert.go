@@ -107,6 +107,9 @@ func convertSelect(node *spannerast.Select) (*ast.SelectStmt, error) {
 	}
 
 	selectStmt := &ast.SelectStmt{
+		TargetList: &ast.List{
+			Items: convertSelectItemList(node.Results),
+		},
 		FromClause:  convertFrom(node.From),
 		WhereClause: convertWhere(node.Where),
 	}
@@ -123,6 +126,29 @@ func convertSelect(node *spannerast.Select) (*ast.SelectStmt, error) {
 	// TODO: support more attributes
 
 	return selectStmt, nil
+}
+
+func convertSelectItemList(list []spannerast.SelectItem) []ast.Node {
+	var items []ast.Node
+	for _, item := range list {
+		items = append(items, convertSelectItem(item))
+	}
+	return items
+}
+
+func convertSelectItem(node spannerast.SelectItem) ast.Node {
+	switch node := node.(type) {
+	case *spannerast.Star:
+		star := &ast.A_Star{}
+		return star
+	case *spannerast.DotStar:
+		_ = node
+		// TODO
+		return notImplemented()
+	default:
+		// TODO
+		return notImplemented()
+	}
 }
 
 func convertFrom(node *spannerast.From) *ast.List {

@@ -30,6 +30,7 @@ func (p *Parser) Parse(r io.Reader) ([]ast.Statement, error) {
 	}
 
 	var stmts []ast.Statement
+	var prevEnd int
 	for _, spStmt := range spStmts {
 		n, err := translate(spStmt)
 		if err != nil {
@@ -41,10 +42,14 @@ func (p *Parser) Parse(r io.Reader) ([]ast.Statement, error) {
 		stmts = append(stmts, ast.Statement{
 			Raw: &ast.RawStmt{
 				Stmt:         n,
-				StmtLocation: int(spStmt.Pos()),
-				StmtLen:      len(spStmt.SQL()),
+				StmtLocation: prevEnd,
+				StmtLen:      (int(spStmt.Pos()) - prevEnd) + len(spStmt.SQL()),
 			},
 		})
+		// sqlc needs leading comment + statement. not just stmt.Pos().
+		// use previous statement's end + len to get the start of the current statement.
+		// + 1 is consumer about ";". memefish doesn't include it in the SQL.
+		prevEnd = int(spStmt.Pos()) + len(spStmt.SQL()) + 1
 	}
 
 	return stmts, nil
