@@ -10,30 +10,30 @@ require (
 	github.com/cubicdaiya/gonp v1.0.4
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/structtag v1.2.0
-	github.com/go-sql-driver/mysql v1.9.1
-	github.com/google/cel-go v0.24.1
+	github.com/go-sql-driver/mysql v1.9.2
+	github.com/google/cel-go v0.25.0
 	github.com/google/go-cmp v0.7.0
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/jinzhu/inflection v1.0.0
 	github.com/lib/pq v1.10.9
-	github.com/pganalyze/pg_query_go/v6 v6.0.0
+	github.com/pganalyze/pg_query_go/v6 v6.1.0
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20250324122243-d51e00e5bbf0
 	github.com/riza-io/grpc-go v0.2.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/tetratelabs/wazero v1.9.0
-	github.com/wasilibs/go-pgquery v0.0.0-20250219053243-148840c597e6
+	github.com/wasilibs/go-pgquery v0.0.0-20250409022910-10ac41983c07
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/sync v0.12.0
-	google.golang.org/grpc v1.71.0
+	golang.org/x/sync v0.13.0
+	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/yaml.v3 v3.0.1
-	modernc.org/sqlite v1.36.2
+	modernc.org/sqlite v1.37.0
 )
 
 require (
-	cel.dev/expr v0.19.1 // indirect
+	cel.dev/expr v0.23.1 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -61,14 +61,14 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250218202821-56aae31c358a // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250218202821-56aae31c358a // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
-	modernc.org/libc v1.61.13 // indirect
+	modernc.org/libc v1.62.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.8.2 // indirect
+	modernc.org/memory v1.9.1 // indirect
 )
