@@ -1,0 +1,31 @@
+{{define "dbCodeTemplateSpanner"}}
+
+type DBRO interface {
+	ReadRow(ctx context.Context, table string, key spanner.Key, columns []string) (*spanner.Row, error)
+	ReadRowWithOptions(ctx context.Context, table string, key spanner.Key, columns []string, opts *spanner.ReadOptions) (*spanner.Row, error)
+	Query(ctx context.Context, statement spanner.Statement) *spanner.RowIterator
+	QueryWithOptions(ctx context.Context, statement spanner.Statement, opts spanner.QueryOptions) *spanner.RowIterator
+}
+
+type DBRW interface {
+	DBRO
+	BufferWrite(ms []*spanner.Mutation) error
+	Update(ctx context.Context, stmt spanner.Statement) (rowCount int64, err error)
+	UpdateWithOptions(ctx context.Context, stmt spanner.Statement, opts spanner.QueryOptions) (rowCount int64, err error)
+}
+
+{{ if .EmitMethodsWithDBArgument}}
+func New() *Queries {
+	return &Queries{}
+{{- else -}}
+func New(db DBRO) *Queries {
+	return &Queries{db: db}
+{{- end}}
+}
+
+type Queries struct {
+    {{if not .EmitMethodsWithDBArgument}}
+	db DBRO
+    {{end}}
+}
+{{end}}

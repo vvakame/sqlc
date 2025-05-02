@@ -25,6 +25,8 @@ import (
 
 {{if .SQLDriver.IsPGX }}
 	{{- template "dbCodeTemplatePgx" .}}
+{{else if .SQLDriver.IsSpanner }}
+	{{- template "dbCodeTemplateSpanner" .}}
 {{else}}
 	{{- template "dbCodeTemplateStd" .}}
 {{end}}
@@ -188,6 +190,8 @@ import (
 {{define "queryCode"}}
 {{if .SQLDriver.IsPGX }}
     {{- template "queryCodePgx" .}}
+{{else if .SQLDriver.IsSpanner }}
+	{{- template "queryCodeSpanner" .}}
 {{else}}
     {{- template "queryCodeStd" .}}
 {{end}}

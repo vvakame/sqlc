@@ -132,6 +132,8 @@ func (i *importer) dbImports() fileImports {
 	case opts.SQLDriverPGXV5:
 		pkg = append(pkg, ImportSpec{Path: "github.com/jackc/pgx/v5/pgconn"})
 		pkg = append(pkg, ImportSpec{Path: "github.com/jackc/pgx/v5"})
+	case opts.SQLDriverSpanner:
+		pkg = append(pkg, ImportSpec{Path: "cloud.google.com/go/spanner"})
 	default:
 		std = append(std, ImportSpec{Path: "database/sql"})
 		if i.Options.EmitPreparedQueries {
@@ -194,6 +196,10 @@ func buildImports(options *opts.Options, queries []Query, uses func(string) bool
 		} else {
 			pkg[ImportSpec{Path: "github.com/jackc/pgtype"}] = struct{}{}
 		}
+	}
+
+	if uses("spanner.") {
+		pkg[ImportSpec{Path: "cloud.google.com/go/spanner"}] = struct{}{}
 	}
 
 	for typeName := range pqtypeTypes {
@@ -400,6 +406,11 @@ func (i *importer) queryImports(filename string) fileImports {
 	}
 	if sliceScan() && !sqlpkg.IsPGX() {
 		pkg[ImportSpec{Path: "github.com/lib/pq"}] = struct{}{}
+	}
+	if sqlpkg.IsSpanner() {
+		pkg[ImportSpec{Path: "errors"}] = struct{}{}
+		pkg[ImportSpec{Path: "google.golang.org/api/iterator"}] = struct{}{}
+		pkg[ImportSpec{Path: "cloud.google.com/go/spanner"}] = struct{}{}
 	}
 
 	if i.Options.WrapErrors {

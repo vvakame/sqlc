@@ -69,6 +69,13 @@ func convertSchemaType(node spannerast.SchemaType) (*ast.TypeName, error) {
 			Location: int(node.Pos()),
 		}, nil
 
+	case *spannerast.NamedType:
+		// TODO: Temporary implementation to prevent errors. Will be properly implemented later.
+		return &ast.TypeName{
+			Name:     node.SQL(),
+			Location: int(node.Pos()),
+		}, nil
+
 	default:
 		return nil, fmt.Errorf("unsupported node type: %T, %q", node, node.SQL())
 	}
@@ -107,6 +114,7 @@ func convertSelect(node *spannerast.Select) (*ast.SelectStmt, error) {
 	}
 
 	selectStmt := &ast.SelectStmt{
+		DistinctClause: &ast.List{}, // TODO
 		TargetList: &ast.List{
 			Items: convertSelectItemList(node.Results),
 		},
@@ -145,6 +153,9 @@ func convertSelectItem(node spannerast.SelectItem) ast.Node {
 		_ = node
 		// TODO
 		return notImplemented()
+	case *spannerast.ExprSelectItem:
+		// TODO is this correct?
+		return convertExpr(node.Expr)
 	default:
 		// TODO
 		return notImplemented()
@@ -152,11 +163,11 @@ func convertSelectItem(node spannerast.SelectItem) ast.Node {
 }
 
 func convertFrom(node *spannerast.From) *ast.List {
-	if node == nil {
-		return nil
-	}
-
 	list := &ast.List{}
+
+	if node == nil {
+		return list
+	}
 
 	tableExpr, err := convertTableExpr(node.Source)
 	if err != nil {

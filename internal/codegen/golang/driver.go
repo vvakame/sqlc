@@ -8,6 +8,8 @@ func parseDriver(sqlPackage string) opts.SQLDriver {
 		return opts.SQLDriverPGXV4
 	case opts.SQLPackagePGXV5:
 		return opts.SQLDriverPGXV5
+	case opts.SQLPackageSpanner:
+		return opts.SQLDriverSpanner
 	default:
 		return opts.SQLDriverLibPQ
 	}
